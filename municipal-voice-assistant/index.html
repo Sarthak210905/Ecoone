@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Municipal Voice Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+<div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-left">
+                <i class="fas fa-building header-icon"></i>
+                <div class="header-title">
+                    <h1>Municipal Voice Assistant</h1>
+                    <span class="header-subtitle">Smart City Services at Your Voice</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="mode-toggle">
+                    <button class="mode-btn active" id="textModeBtn">
+                        <i class="fas fa-keyboard"></i> Text
+                    </button>
+                    <button class="mode-btn" id="voiceModeBtn">
+                        <i class="fas fa-microphone"></i> Voice
+                    </button>
+                </div>
+                <button class="header-btn" id="ttsToggleBtn" title="Toggle auto-speak">
+                    <i class="fas fa-volume-up"></i>
+                </button>
+                <button class="header-btn" onclick="assistant.openSettings()" title="Settings">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button class="header-btn" onclick="assistant.clearSession()" title="New chat">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="status-dot online" id="connectionStatus"></span>
+                <span id="statusText">Ready</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-user-circle"></i>
+                <span id="authStatus">Guest</span>
+            </div>
+            <div class="status-item">
+                <i class="fas fa-clock"></i>
+                <span id="sessionInfo">New Session</span>
+            </div>
+        </div>
+
+        <!-- Permission Banner -->
+        <div class="permission-banner" id="permissionBanner">
+            <div class="permission-content">
+                <i class="fas fa-microphone-slash"></i>
+                <div class="permission-text">
+                    <h4>Microphone Access Required</h4>
+                    <p>Enable microphone to use voice features</p>
+                </div>
+            </div>
+            <button class="permission-btn" onclick="assistant.requestMicrophonePermission()">
+                Enable Microphone
+            </button>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="chat-area" id="chatMessages">
+            <div class="welcome-section">
+                <div class="welcome-icon">🏛️</div>
+                <h2>Welcome to Municipal Voice Assistant!</h2>
+                <p>I can help you with complaints, OTP verification, profile management, and municipal information through voice or text.</p>
+
+                <div class="quick-actions">
+                    <div class="quick-action" onclick="assistant.sendQuickMessage('Show me available services')">
+                        <div class="quick-action-icon"><i class="fas fa-list"></i></div>
+                        <h3>Available Services</h3>
+                        <p>Learn about all municipal services</p>
+                    </div>
+                    <div class="quick-action" onclick="assistant.sendQuickMessage('What are the complaint categories?')">
+                        <div class="quick-action-icon"><i class="fas fa-tags"></i></div>
+                        <h3>Complaint Categories</h3>
+                        <p>View all complaint types</p>
+                    </div>
+                    <div class="quick-action" onclick="assistant.sendQuickMessage('I want to register a complaint')">
+                        <div class="quick-action-icon"><i class="fas fa-exclamation-circle"></i></div>
+                        <h3>Register Complaint</h3>
+                        <p>Report municipal issues</p>
+                    </div>
+                    <div class="quick-action" onclick="assistant.sendQuickMessage('I want to login with OTP')">
+                        <div class="quick-action-icon"><i class="fas fa-sign-in-alt"></i></div>
+                        <h3>Login with OTP</h3>
+                        <p>Authenticate with mobile</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Indicator -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="message-avatar" style="background: linear-gradient(135deg, var(--primary-color), var(--primary-dark)); color: white;">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="typing-dots">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voice Only Section -->
+        <div class="voice-only-section" id="voiceOnlySection">
+            <div class="voice-animation" id="bigVoiceBtn">
+                <i class="fas fa-microphone"></i>
+            </div>
+            <div class="voice-status" id="voiceStatus">
+                Ready to listen - Click microphone to speak
+            </div>
+        </div>
+
+        <!-- Input Container -->
+        <div class="input-container" id="inputContainer">
+            <div class="input-wrapper">
+                <textarea 
+                    class="input-field" 
+                    id="messageInput" 
+                    placeholder="Type your message or complaint here..."
+                    rows="1"
+                    maxlength="1000"
+                ></textarea>
+                <span class="char-counter" id="charCounter">0/1000</span>
+            </div>
+            <div class="input-actions">
+                <button class="action-btn voice-btn" id="voiceInputBtn" title="Voice input">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button class="action-btn send-btn" id="sendBtn" title="Send message">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-content">
+            <div class="settings-header">
+                <h2><i class="fas fa-cog"></i> Settings</h2>
+                <button class="close-btn" onclick="assistant.closeSettings()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="settings-body">
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span>Auto-Speak Responses</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="autoSpeakToggle" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span>Voice Speed</span>
+                        <span class="setting-value" id="speedValue">0.9x</span>
+                    </div>
+                    <div class="setting-control">
+                        <input type="range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="0.9">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span>Voice Pitch</span>
+                        <span class="setting-value" id="pitchValue">1.0x</span>
+                    </div>
+                    <div class="setting-control">
+                        <input type="range" id="voicePitch" min="0.5" max="2" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span>Voice Volume</span>
+                        <span class="setting-value" id="volumeValue">100%</span>
+                    </div>
+                    <div class="setting-control">
+                        <input type="range" id="voiceVolume" min="0" max="1" step="0.1" value="1">
+                    </div>
+                </div>
+
+                <div class="setting-group">
+                    <div class="setting-label">
+                        <span>Speech Language</span>
+                    </div>
+                    <div class="setting-control">
+                        <select id="speechLang">
+                            <option value="en-IN" selected>English (India)</option>
+                            <option value="hi-IN">Hindi (India)</option>
+                            <option value="en-US">English (US)</option>
+                            <option value="en-GB">English (UK)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+</body>
+</html>
