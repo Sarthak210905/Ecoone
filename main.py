@@ -11,8 +11,8 @@ from app.database.database import init_db
 from app.utils.redis_client import connect_redis, redis_client
 from app.routes.auth_routes import router as auth_router
 from app.routes.user_routes import router as user_router
-from app.routes.grievance_routes import router as grievance_router  # New import
-from app.routes.grievance_admin_routes import router as grievance_admin_router  # Admin routes for AI Agent
+from app.routes.grievance_routes import router as grievance_router 
+from app.routes.grievance_admin_routes import router as grievance_admin_router  
 load_dotenv()
 
 app = FastAPI(
@@ -68,8 +68,8 @@ async def shutdown():
 # Register routes
 app.include_router(auth_router, prefix="/api/auth")
 app.include_router(user_router, prefix="/api/users")
-app.include_router(grievance_router, prefix="/api/grievances")  # User grievance routes
-app.include_router(grievance_admin_router, prefix="/api/grievances")  # Admin grievance routes for AI Agent
+app.include_router(grievance_router, prefix="/api/grievances")  
+app.include_router(grievance_admin_router, prefix="/api/grievances")  
 
 # Error handler
 @app.middleware("http")
